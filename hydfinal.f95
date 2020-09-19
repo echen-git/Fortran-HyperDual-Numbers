@@ -1,5 +1,4 @@
 
-
       module hydfinal
       !DEC$ ATTRIbUTES DLLEXPORT :: SP, DP, QP, PR
       
@@ -14,10 +13,10 @@
 
       !--- DEFINITION OF THE DERIVED TYPE
       TYPE hyperdual
-        double precision :: f0
-        double precision :: f1
-        double precision :: f2
-        double precision :: f12
+        real(PR) :: f0
+        real(PR) :: f1
+        real(PR) :: f2
+        real(PR) :: f12
       END TYPE
 
       
@@ -158,7 +157,7 @@
 
       !----- Intrinsic functions
       interface dble
-        module procedure dble_hyd, dble_hyd_array, dble_hyd_matrix
+        module procedure dble_hyd, dble_hyd_array
       end interface
       
       interface abs
@@ -214,14 +213,7 @@
           matmul_hyd_array_hyd_matrix, matmul_hyd_array_dble_matrix, &
           matmul_hyd_matrix_hyd_array, matmul_hyd_matrix_hyd_matrix, &
             matmul_hyd_matrix_dble_array, matmul_hyd_matrix_dble_matrix, &
-          matmul_dble_array_hyd_matrix, &
-          matmul_dble_matrix_hyd_array, matmul_dble_matrix_hyd_matrix
-      end interface
-
-      interface dot_product
-        module procedure &
-          dot_product_hyd_array_hyd_array, dot_product_hyd_array_dble_array, &
-          dot_product_dble_array_hyd_array
+          matmul_dble_array_hyd_matrix, matmul_dble_matrix_hyd_matrix
       end interface
       
       interface exp
@@ -232,9 +224,7 @@
         module procedure log_hyd
       end interface
       
-      interface aimag
-          module procedure imag1_hyd, imag2_array_hyd
-      end interface
+ 
 
       interface conjg
           module procedure conjg_hyd
@@ -283,6 +273,8 @@
       !----------------------------------------------------------------!
       !                          ASSIGNMENT                            !
       !----------------------------------------------------------------!
+       
+           
 
         subroutine hyd_assign_hyd(lhs, rhs) 
         !DEC$ ATTRIbUTES DLLEXPORT, ALIAS : "hyd_assign_hyd" :: hyd_assign_hyd
@@ -293,14 +285,14 @@
         
           lhs%f0 = rhs%f0
           lhs%f1 = rhs%f1
-          lhs%f1 = rhs%f2
-          lhs%f1 = rhs%f12
-        
+          lhs%f2 = rhs%f2
+          lhs%f12 = rhs%f12
+       
         end subroutine hyd_assign_hyd
 
         subroutine hyd_assign_cplx(lhs, rhs) 
         !DEC$ ATTRIbUTES DLLEXPORT, ALIAS : "hyd_assign_cplx" :: hyd_assign_cplx
-
+        !Work in progress
           
           TYPE(hyperdual), intent(out)  :: lhs
           complex(PR), intent(in)       :: rhs
@@ -890,8 +882,7 @@
                 
                 
           TYPE(hyperdual), intent(in) :: lhs
-          !real(PR), intent(in)        :: rhs
-          real, intent(in)            :: rhs
+          real(PR), intent(in)            :: rhs
           TYPE(hyperdual)             :: res
                 
           res%f0 = lhs%f0 + rhs 
@@ -906,8 +897,7 @@
                 
                 
           TYPE(hyperdual), intent(in)         :: lhs
-          !real(PR), dimension(:), intent(in)  :: rhs
-          real, dimension(:), intent(in)  :: rhs
+          real(PR), dimension(:), intent(in)  :: rhs
           TYPE(hyperdual), dimension(size(rhs))  :: res
                 
           res%f0 = lhs%f0 + rhs 
@@ -922,8 +912,7 @@
                 
                 
           TYPE(hyperdual), intent(in)           :: lhs
-          !real(PR), dimension(:,:), intent(in)  :: rhs
-          real, dimension(:,:), intent(in)  :: rhs
+          real(PR), dimension(:,:), intent(in)  :: rhs
           TYPE(hyperdual), dimension(size(rhs,1),size(rhs,2)) :: res
                 
           res%f0 = lhs%f0 + rhs 
@@ -938,8 +927,8 @@
                 
                 
           TYPE(hyperdual), intent(in)             :: lhs
-          !real(PR), dimension(:,:,:), intent(in)  :: rhs
-          real, dimension(:,:,:), intent(in)  :: rhs
+        
+          real(PR), dimension(:,:,:), intent(in)  :: rhs
           TYPE(hyperdual),  dimension(size(rhs,1),size(rhs,2),size(rhs,3)) :: res
           res%f0 = lhs%f0 + rhs 
           res%f1 = lhs%f1 
@@ -1022,8 +1011,8 @@
                 
           res%f0 = lhs%f0 + rhs%f0
           res%f1 = lhs%f1 + rhs%f1
-          res%f2 = lhs%f2 
-          res%f12 = lhs%f12
+          res%f2 = lhs%f2 + rhs%f2
+          res%f12 = lhs%f12 + rhs%f12
 
           return
         end function hyd_array_plus_hyd
@@ -1037,8 +1026,8 @@
                 
           res%f0 = lhs%f0 + rhs%f0
           res%f1 = lhs%f1 + rhs%f1
-          res%f2 = lhs%f2 
-          res%f12 = lhs%f12
+          res%f2 = lhs%f2 + rhs%f2
+          res%f12 = lhs%f12 + rhs%f12
 
           return          
         end function hyd_array_plus_hyd_array
@@ -3507,24 +3496,7 @@
           return
         end function dble_hyd_array
 
-        function dble_hyd_matrix(hyd_in) result(matrix_out)
-        !DEC$ ATTRIBUTES DLLEXPORT, ALIAS : "dble_hyd_matrix" :: dble_hyd_matrix
-          
-          
-          TYPE(hyperdual), dimension(:,:), intent(in)     :: hyd_in
-          real(PR), dimension(size(hyd_in,1), size(hyd_in,2)) :: X_out
-          integer :: i, j
-
-          do i = 1, size(hyd_in,1)
-            do j = 1, size(hyd_in,2)
-              matrix_out(i,j) = DBLE(hyd_in(i,j)%f0)
-            enddo
-          enddo
-            
-          return
-        end function dble_hyd_matrix
-
-
+     
       !----- ABS (absolute value)
         function abs_hyd(hyd_in) result(abs_out)
         !DEC$ ATTRIBUTES DLLEXPORT, ALIAS : "abs_hyd" :: abs_hyd
@@ -3933,57 +3905,8 @@
         end function conjg_hyd
         
       !----- Real part
-        function real_hyd(hyd) result(res)
-        
           
-          TYPE(hyperdual), intent(in) :: hyd
-          real(PR)                    :: res
-        
-          res = dreal(hyd%f0)
-        
-          return
-        end function real_hyd
-        
-      !----- Imaginary part
-        function imag1_hyd(hyd,iright) result(imag_hyd)
-        !DEC$ ATTRIBUTES DLLEXPORT, ALIAS : "imag1_hyd" :: imag1_hyd
-        
-          
-          TYPE(hyperdual), intent(in) :: hyd
-          integer, intent(in)         :: iright
-          real(PR)                    :: imag_hyd
-        
-          select case (iright)
-            case (1)
-              imag_hyd  = dimag(hyd%f0)
-            case (2)
-              imag_hyd  = dreal(hyd%f1)
-            case (3)
-              imag_hyd  = dimag(hyd%f1)
-          end select
-        
-          return
-        end function imag1_hyd
-        
-        function imag2_array_hyd(hyd,iright) result(qimag)
-        !DEC$ ATTRIBUTES DLLEXPORT, ALIAS : "imag2_array_hyd" :: imag2_array_hyd
-        
-          
-          TYPE(hyperdual), dimension (:), intent(in) :: hyd
-          integer, intent(in)           :: iright
-          real(PR), dimension(size(hyd))  :: qimag
-        
-          select case (iright)
-            case (1)
-              hydimag = dimag(hyd%f0)
-            case (2)
-              hydimag = dreal(hyd%f1)
-            case (3)
-              hydimag = dimag(hyd%f1)
-          end select
-        
-          return
-        end function imag2_array_hyd
+     
         
       !----- Exponential
         function exp_hyd(hyd) result(res)
@@ -4123,10 +4046,11 @@
             TYPE(hyperdual)             :: res
             TYPE(hyperdual)             :: minus
             TYPE(hyperdual)             :: exp1, exp2 
-            exp1 = hyd_exp(hyd)
-            exp2 = hyd_exp(-hyd)
+            real(PR)                    :: num = 2.0_PR
+            exp1 = exp_hyd(hyd)
+            exp2 = exp_hyd(-hyd)
             minus = hyd_minus_hyd(exp1, exp2)
-            res = hyd_div_dble(minus, 2.0)
+            res = hyd_div_dble(minus, num)
             
             return
         end function hyd_sinh 
@@ -4176,7 +4100,8 @@
         !DEC$ ATTRIBUTES DLLEXPORT, ALIAS : "sqrt_hyd" :: sqrt_hyd
            type(hyperdual), intent(in) :: hyd
            type(hyperdual) :: res
-           res = hyd_pow_dble(hyd, 0.5)
+           real(PR) :: num = 0.5_PR
+           res = hyd_pow_dble(hyd, num)
         
         end function sqrt_hyd
         
